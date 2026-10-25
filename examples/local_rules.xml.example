@@ -1,0 +1,12 @@
+<!-- Example only: validate against your installed Wazuh version before use. -->
+<group name="local,sshd,">
+  <rule id="100003" level="10" frequency="3" timeframe="120">
+    <if_matched_sid>5760</if_matched_sid>
+    <same_srcip />
+    <description>Possible SSH brute-force attack: 3 failed SSH authentication attempts from the same source IP within 120 seconds.</description>
+    <mitre>
+      <id>T1110.001</id>
+    </mitre>
+    <group>authentication_failed,ssh_bruteforce,</group>
+  </rule>
+</group>

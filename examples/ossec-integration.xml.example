@@ -1,0 +1,8 @@
+<!-- Example only. Replace the placeholder with the workflow's actual webhook URL.
+     Do not commit a URL/token that grants access to a live Shuffle workflow. -->
+<integration>
+  <name>shuffle</name>
+  <hook_url>REPLACE_WITH_YOUR_SHUFFLE_WEBHOOK_URL</hook_url>
+  <rule_id>100003</rule_id>
+  <alert_format>json</alert_format>
+</integration>

@@ -1,0 +1,26 @@
+# Credentials and secrets
+.env
+.env.*
+!.env.example
+*.secret
+secrets.*
+secret.conf
+wazuh-install-files.tar
+wazuh-passwords.txt
+*-passwords.txt
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa
+id_ed25519
+
+# Local/runtime artifacts
+*.log
+*.tmp
+*.swp
+*.bak
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
