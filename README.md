@@ -51,7 +51,6 @@ The lab uses VirtualBox with NAT for updates and a host-only adapter for private
 | `WAZUH-SERVER` | Ubuntu Server | 4 | 8 GB | 100 GB | `192.168.56.10/24` |
 | `THEHIVE-SERVER` | Ubuntu Server | 4 | 12 GB | 100 GB | `192.168.56.30/24`; web UI at `http://192.168.56.30:9000` in this isolated lab |
 | `KALI-LINUX` | Kali Linux | 2 | 4 GB | 80 GB | Original setup notes list `192.168.56.107`; verify the current address before using it |
-| `LINUX-ENDPOINT` | Ubuntu/Linux endpoint | — | — | — | Used in later SSH-authentication workflow testing; current address in the lab notes is `192.168.56.100` |
 
 Hardware values are the VM allocations recorded in the build notes; adapt them to the host machine's available memory and storage.
 
