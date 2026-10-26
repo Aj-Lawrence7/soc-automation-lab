@@ -1,8 +1,8 @@
 # SOC Alert Enrichment & Human-Approved Response Lab
 
-A hands-on Security Operations Center (SOC) home lab that brings together **Wazuh**, **Shuffle**, **VirusTotal**, **TheHive**, email notifications, and a Kali Linux test machine to explore alert detection, IOC enrichment, incident handling, and analyst-approved response.
+A hands-on Security Operations Center (SOC) home lab that brings together **Wazuh**, **Shuffle**, **VirusTotal**, **TheHive**, and a Kali Linux test machine to explore alert detection, IOC enrichment, incident handling, and analyst-approved response.
 
-> **Project status: In progress.** Wazuh is receiving SSH authentication events, and the Shuffle workflow reaches the email/approval stage. The post-approval `firewall-drop` action and TheHive case-creation path still need end-to-end validation. This repository documents the current design and build; it does not claim that every response step is already operational.
+> **Project status: In progress.** TheHive case-creation path still needd end-to-end validation. This repository documents the current design and build; it does not claim that every response step is already operational.
 
 ## Goals
 
@@ -24,9 +24,8 @@ The diagram above is the exported architecture supplied with the project. The in
 2. **Detect:** The Wazuh agent forwards logs to the Wazuh manager, where rules generate alerts.
 3. **Orchestrate:** Wazuh sends matching alert JSON to a Shuffle webhook.
 4. **Enrich:** Shuffle extracts the alert's source IP and requests reputation information from VirusTotal/OSINT sources.
-5. **Notify and approve:** Shuffle sends an email and asks the analyst whether the source IP should be blocked.
-6. **Respond:** Only the approved branch should invoke the Wazuh API Active Response command on the intended agent.
-7. **Document:** The intended integration creates a TheHive alert/case so the incident can be investigated and tracked.
+5. **Respond:** The Wazuh API Active Response command must be invoked on the intended agent.
+6. **Document:** The intended integration creates a TheHive alert/case so the incident can be investigated and tracked.
 
 **Safety principle:** notification and enrichment may happen automatically; containment must not happen before explicit analyst approval.
 
@@ -61,12 +60,9 @@ Hardware values are the VM allocations recorded in the build notes; adapt them t
 | Wazuh manager and endpoint telemetry | Working | SSH authentication alerts have appeared in Wazuh, including a source-IP field for an accepted SSH connection. |
 | SSH authentication alerting | Working / being tuned | Review the matching rule ID and test repeated failed attempts in the lab. |
 | Shuffle Cloud + self-hosted Orborus | Runtime deployed | At last check, `shuffle-workers` was `1/1`; HTTP, Subflow, AI, and Tools services were `2/2`. |
-| Alert-to-email / analyst approval | Reached in testing | Workflow sends an email asking whether the source IP should be blocked. |
-| Wazuh API JWT authentication | Needs final validation | A previous `get-api` request returned `401 Unauthorized: Invalid credentials`; use the Wazuh API account credentials, not the Ubuntu login by assumption. |
-| Approved Wazuh `firewall-drop` response | In progress | Clicking Yes has not yet been confirmed to execute a block on the target agent. |
+| Wazuh API JWT authentication | Working | The `get-api` request returns a valid JWT token  |
+| Approved Wazuh `firewall-drop` response | Working | The source IP addresses is added to the local machine's IP tables deny/drop list |
 | TheHive case creation | Needs end-to-end validation | TheHive is part of the design; capture evidence only after a test alert is confirmed in TheHive. |
-
-Update this table as the remaining tests pass. Keeping unfinished items explicit demonstrates a realistic engineering workflow.
 
 ## Repository layout
 
