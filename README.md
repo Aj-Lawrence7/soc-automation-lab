@@ -9,7 +9,6 @@ A hands-on Security Operations Center (SOC) home lab that brings together **Wazu
 - Collect endpoint security events and detect suspicious SSH authentication activity.
 - Forward selected Wazuh alerts to a Shuffle workflow.
 - Extract the source IP and enrich it with OSINT/reputation context using VirusTotal.
-- Notify a SOC analyst and ask for explicit approval before blocking an IP.
 - Use Wazuh Active Response for approved containment on a designated lab agent.
 - Create or track an incident in TheHive for case management.
 - Document troubleshooting, testing, and security decisions in a reproducible way.
