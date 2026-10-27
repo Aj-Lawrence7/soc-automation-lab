@@ -1,6 +1,6 @@
 # Lab Setup Notes
 
-This document consolidates the supplied SOC lab build notes. It is a record of the lab configuration, not a one-command installation guide; commands and package versions should be checked against the versions actually installed.
+This document records the lab build and relevant configuration. It is not a one-command installation guide; verify package versions and settings against the versions actually installed.
 
 ## Virtual machine specifications
 
@@ -10,44 +10,49 @@ This document consolidates the supplied SOC lab build notes. It is a record of t
 | `THEHIVE-SERVER` | Ubuntu Server | 4 | 12 GB | 100 GB | NAT + Host-only |
 | `KALI-LINUX` | Kali Linux | 2 | 4 GB | 80 GB | NAT + Host-only |
 
-The lab host-only network uses the `192.168.56.0/24` range. NAT is used for operating-system updates; host-only networking is used for private lab traffic. Do not expose these management services directly to the public internet.
+The host-only network uses the `192.168.56.0/24` range. NAT is used for operating-system updates; host-only networking is used for private lab traffic. Do not expose management services directly to the public internet.
 
 ## Wazuh server
 
-- Assign a static host-only address of `192.168.56.10/24`.
-- Install Wazuh using the official installation assistant.
-- Save installation credentials securely and outside the Git repository.
-- Confirm that the manager, indexer, dashboard, and API services are healthy before adding integrations.
+- Reference host-only address: `192.168.56.10/24`.
+- Wazuh was installed using the installation assistant.
+- The manager and endpoint have generated SSH authentication alerts, including the custom rule ID `100003`.
+- Wazuh Active Response command dispatch was exercised via the API. A captured Shuffle result returned HTTP `200`, one affected item, zero failed items, and `AR command was sent to all agents`.
+- The screenshot for this captured action references agent ID `004`; older lab notes referenced ID `003` for `LINUX-ENDPOINT`. Confirm the correct agent ID from the current Wazuh manager before testing.
 
 ## TheHive server
 
-- Assign a static host-only address of `192.168.56.30/24`.
-- Install updates and enable SSH for administration.
-- Install the required Java runtime and dependencies, then configure Cassandra, Elasticsearch, and TheHive according to the relevant version-specific documentation.
-- The original build notes mention using Python 3.9 to run `cqlsh` because the system Python version caused compatibility issues. Avoid changing the system Python symlink; invoke the compatible interpreter explicitly.
-- The original Elasticsearch setup used `127.0.0.1:9200` for local service access and disabled Elasticsearch HTTP TLS because certificate trust could not be resolved in the isolated lab. Treat this strictly as a lab-specific choice, not as a production recommendation.
-- The original TheHive base URL was configured as `http://192.168.56.30:9000` for access from the host-only network.
+- Reference host-only address: `192.168.56.30/24`.
+- The attempted installation used Cassandra, Elasticsearch, and TheHive.
+- The earlier build used `127.0.0.1:9200` for local Elasticsearch access and disabled Elasticsearch HTTP TLS because certificate trust could not be resolved in the isolated lab. Treat this strictly as a lab-specific configuration, not a production recommendation.
+- The original TheHive base URL was configured as `http://192.168.56.30:9000` for host-only access.
+- **TheHive case creation was not integrated into the final Shuffle workflow because of hardware/resource limitations.** It remains a potential future extension and is not represented as completed.
 
 ## Kali Linux and monitored endpoints
 
-- Install and enroll the Wazuh agent on the Kali VM if it is intended to send events to Wazuh.
-- Original setup notes list Kali at `192.168.56.107`; verify the current interface configuration with `ip -br addr` before running tests because addresses changed during troubleshooting.
-- For SSH use cases, verify the SSH server is installed, active, listening on the host-only interface, and permitted by the endpoint firewall. An installed SSH client does not mean the machine accepts incoming SSH connections.
-- Ensure each Wazuh agent's configured manager address matches the lab's current Wazuh server address.
+- Kali was intended to send controlled authentication activity to the lab and was enrolled as a Wazuh agent.
+- Historical build notes listed Kali at `192.168.56.107`; other test configurations used different addresses. Verify the current interface configuration with `ip -br addr` before testing.
+- For SSH use cases, verify the SSH server is installed, active, listening on the host-only interface, and permitted by the endpoint firewall. An installed SSH client does not mean the machine accepts incoming connections.
+- Ensure each Wazuh agent's manager address matches the lab's current Wazuh server address.
 
-## Wazuh API and Shuffle runtime
+## Shuffle Cloud and self-hosted Orborus
 
-- Shuffle Cloud is used for workflow design; a self-hosted Orborus runtime named `SOC Lab` was deployed on `WAZUH-SERVER` to reach services on the private lab network.
-- At the last recorded check, the worker service was running and the HTTP, AI, Subflow, and Tools services had their desired replicas.
-- The Wazuh API endpoint is normally available at `https://192.168.56.10:55000` within the lab, provided the API is listening on that address and the container has a route to it.
-- API credentials are distinct from the Ubuntu login. Use the Wazuh API username/password to obtain a JWT, then pass the token in the API's expected authentication field/header. Do not commit the token or the password archive.
-- The `get-api` workflow node previously returned `401 Unauthorized: Invalid credentials`; authenticate with the correct Wazuh API account before considering the API-response path verified.
+- Shuffle Cloud was used to author the workflow.
+- A self-hosted Orborus runtime named `SOC Lab` was deployed on `WAZUH-SERVER` so workflow workers could access private lab services.
+- At the last successful service check, `shuffle-workers` was `1/1`; HTTP, AI, Subflow, and Tools services were `2/2`.
+- Reference Wazuh API endpoint: `https://192.168.56.10:55000`, provided that the API is listening on the address and is reachable from the worker.
+- Wazuh API credentials are distinct from the Ubuntu login. Obtain a JWT from the Wazuh API and pass it according to the expected authentication scheme. Never commit the token, password archive, or credentials.
+- The API Active Response action was successfully dispatched in the captured test; keep the target agent ID synchronized with the current Wazuh installation.
+
+## Resource limitation
+
+The completed workflow focuses on Wazuh detection, Shuffle orchestration/notification/approval, and Wazuh Active Response dispatch. I was not able to integrate TheHive into the final workflow because the available host hardware/resources were insufficient to support the intended combined lab reliably.
 
 ## Sources to consult during maintenance
 
-- Wazuh official documentation: https://documentation.wazuh.com/
+- Wazuh documentation: https://documentation.wazuh.com/
 - TheHive documentation: https://docs.strangebee.com/
 - Docker Engine for Ubuntu: https://docs.docker.com/engine/install/ubuntu/
 - Shuffle documentation: https://shuffler.io/docs
 
-Review commands and settings against the installed versions before applying changes. Keep credentials and tokens out of shell history, screenshots, logs copied to public issues, and Git commits.
+Keep credentials and tokens out of shell history, screenshots, logs copied to public issues, and Git commits.

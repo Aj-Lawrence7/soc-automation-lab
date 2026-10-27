@@ -1,51 +1,52 @@
 # Validation and Test Checklist
 
-Use an isolated test source/target and retain evidence for each check. Do not test against the Windows host, host-only gateway, or any address whose ownership is uncertain.
+## Completion summary
 
-## 1. Endpoint telemetry
+The core SOC automation project is marked **complete** for its current scope. Evidence screenshots show the SSH-authentication alert context reaching Shuffle and a successful Wazuh API Active Response dispatch. TheHive integration was not completed because of hardware/resource limitations and is excluded from the completed scope.
 
-- [ ] Confirm the expected agent is connected to Wazuh.
-- [ ] Generate a controlled SSH authentication event on the lab endpoint.
-- [ ] Confirm the event appears in Wazuh with the expected agent name/ID.
-- [ ] Inspect the decoded alert and confirm whether `data.srcip` exists.
+This checklist distinguishes what has been evidenced from additional validation worth performing after future configuration changes.
 
-## 2. Detection rule
+## 1. Endpoint telemetry and detection
 
-- [ ] Trigger the intended authentication detection with controlled test events.
-- [ ] Confirm the correct rule ID, severity, source IP, timestamp, and description.
-- [ ] Confirm the correlation behavior matches the rule's actual semantics. A frequency/timeframe rule can count repeated matches in a time window; do not describe it as strictly consecutive unless that behavior has been separately implemented and tested.
+- [x] SSH authentication events were visible in Wazuh.
+- [x] A custom SSH brute-force alert using rule ID `100003` appeared in the Shuffle runtime alert context.
+- [x] The runtime data included a timestamp, rule ID, alert title, and source information.
+- [ ] Re-run the detection test after any rule or agent changes and confirm the source IP belongs to the intended test client.
 
-## 3. Shuffle intake and enrichment
+**Detection semantics:** the configured Wazuh frequency/timeframe rule detects repeated matching events within a time window. Do not call it strictly consecutive attempts unless a separate stateful mechanism has been implemented and tested.
 
-- [ ] Confirm the selected Wazuh alert reaches the expected Shuffle webhook.
-- [ ] Inspect the raw execution data and validate the source-IP expression.
-- [ ] Confirm the VirusTotal/OSINT step receives only the intended IP and returns a response.
-- [ ] Confirm an email is delivered with enough alert context for the analyst to make a decision.
+## 2. Shuffle intake and notification
 
-## 4. Approval logic
+- [x] A selected Wazuh alert reached the Shuffle workflow.
+- [x] The workflow reached the analyst email/approval stage.
+- [x] A notification email asked whether the source IP should be blocked.
+- [ ] After modifying the workflow, test the Yes and No branches end to end to confirm only Yes can reach the response action.
+- [ ] Recheck the enrichment node result if its configuration or API key changes.
 
-- [ ] Click **No** and confirm the Wazuh response action does not execute.
-- [ ] Click **Yes** with a verified test source address and confirm the response node runs.
-- [ ] Confirm the source IP passed into the response action matches the reviewed alert.
-- [ ] Confirm the Wazuh API returns a meaningful result and the endpoint logs the action.
-- [ ] Confirm the resulting firewall state on the target endpoint.
-- [ ] Remove any test block using a targeted rollback command; do not flush all firewall rules.
+## 3. Wazuh API and Active Response
 
-## 5. TheHive case management
+- [x] The Wazuh API action returned HTTP `200`.
+- [x] The captured result reported `total_affected_items: 1`, `total_failed_items: 0`, and `AR command was sent to all agents`.
+- [ ] Confirm the target agent ID is correct for the current installation. The screenshot's request URL references agent ID `004`; older lab notes use `003` for `LINUX-ENDPOINT`.
+- [ ] Confirm the target agent's `active-responses.log` records execution.
+- [ ] Confirm the expected firewall rule was applied on the target endpoint and test a targeted rollback.
 
-- [ ] Send a test alert to the TheHive integration.
-- [ ] Confirm a case/alert is created with the expected title, severity, source IP, timestamp, and description.
-- [ ] Confirm repeated alerts behave as intended and do not create accidental duplicates.
+A successful API dispatch response is valuable evidence but does not, on its own, prove that the resulting firewall rule remained applied. Do not test using the Windows host, host-only gateway, or an address whose ownership is uncertain.
 
-## 6. Evidence for the portfolio
+## 4. TheHive integration
 
-Capture redacted screenshots of:
+**Not completed — excluded due to hardware/resource limitations.**
 
-- [ ] The architecture diagram.
-- [ ] Wazuh alert details showing the relevant rule and source IP (use a lab IP, redact hostnames if needed).
-- [ ] Shuffle workflow graph and a successful test execution.
-- [ ] VirusTotal result with the tested IP and response summary.
-- [ ] Approval decision and the corresponding response result.
-- [ ] TheHive test case, once case creation has been confirmed.
+- [ ] Automated case creation from Shuffle was not integrated or validated.
+- [ ] If hardware resources become available, test TheHive API authentication and create a clearly labelled test case before connecting it to production-like alerts.
 
-Before publishing, redact passwords, JWTs, API keys, webhook URLs/tokens, private email addresses, and internal host details you do not want public.
+TheHive is shown in the architecture as a planned case-management extension, not as a working integration.
+
+## 5. Portfolio evidence
+
+- [x] Architecture diagram included.
+- [x] Shuffle runtime alert screenshot included: `../assets/screenshots/01-shuffle-runtime-alert.png`.
+- [x] Wazuh Active Response API result screenshot included: `../assets/screenshots/02-wazuh-active-response-result.png`.
+- [ ] Add a redacted endpoint log/firewall verification screenshot if you later capture it.
+
+Before publishing, redact passwords, JWTs, API keys, webhook URLs/tokens, private email addresses, and internal details you do not want public.
