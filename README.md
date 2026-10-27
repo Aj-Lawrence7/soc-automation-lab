@@ -63,6 +63,30 @@ Hardware values are the VM allocations recorded in the build notes; adapt them t
 | Approved Wazuh `firewall-drop` response | Working | The source IP addresses is added to the local machine's IP tables deny/drop list |
 | TheHive case creation | Needs end-to-end validation | TheHive is part of the design; capture evidence only after a test alert is confirmed in TheHive. |
 
+## Execution Evidence
+
+### 1. Shuffle — SSH Brute-Force Alert
+
+The workflow receives the Wazuh alert for the detected SSH
+brute-force activity. The execution data includes the alert
+description, rule ID, timestamp, and event details.
+
+![Shuffle SSH brute-force alert](assets/screenshots/01-shuffle-runtime-alert.png)
+
+### 2. Wazuh — Active Response API Result
+
+The Wazuh node returned HTTP 200, with one affected item and
+zero failed items. This demonstrates that Wazuh accepted and
+dispatched the Active Response request.
+
+![Wazuh Active Response result](assets/screenshots/02-wazuh-active-response-result.png)
+
+### 3. VirusTotal — IP Reputation Lookup
+
+The Shuffle workflow extracts the source IP address from the Wazuh security alert and queries VirusTotal to retrieve available IP reputation and threat intelligence data. This enrichment step provides additional context about potentially malicious activity and this would be provided in the hive alert that is sent to the SOC analyst for investigation
+
+![VirusTotal IP reputation lookup](assets/screenshots/03-virus-total-IOC-enrichment.png)
+
 ## Repository layout
 
 ```text
