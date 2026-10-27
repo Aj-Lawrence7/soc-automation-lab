@@ -2,7 +2,7 @@
 
 A hands-on Security Operations Center (SOC) home lab that brings together **Wazuh**, **Shuffle**, **VirusTotal**, and a Kali Linux test machine to explore alert detection, indicator-of-compromise (IOC) enrichment, analyst notification, and controlled response.
 
-> **Project status: COMPLETE — implemented scope.** The lab demonstrates Wazuh SSH-authentication alerting, forwarding selected alerts into Shuffle, VirusTotal IP-reputation enrichment, email notification/analyst approval, and Wazuh Active Response API dispatch. The repository includes evidence of workflow execution and API dispatch. Endpoint-level firewall state should still be verified during an end-to-end retest, especially after configuration changes. **I was not able to integrate TheHive into the final workflow because of hardware/resource limitations.** TheHive remains a planned future extension; automated TheHive case creation is not claimed as complete.
+> **Project status: COMPLETE — implemented scope.** The lab demonstrates Wazuh SSH-authentication alerting, forwarding selected alerts into Shuffle, VirusTotal IP-reputation enrichment and Wazuh Active Response API dispatch. The repository includes evidence of workflow execution and API dispatch. **I was not able to integrate TheHive into the final workflow because of hardware/resource limitations.** TheHive remains a planned future extension; automated TheHive case creation is not claimed as complete.
 
 ## Project overview
 
@@ -16,8 +16,6 @@ The implemented workflow covers:
 4. **Enrich and notify:** Shuffle extracts the source IP, queries VirusTotal for available reputation context, and sends an email asking the analyst whether to block the IP.
 5. **Approve and respond:** The approved path requests a Wazuh Active Response using the `firewall-drop` command.
 6. **Capture evidence:** Screenshots document the alert context, VirusTotal enrichment, and a Wazuh API dispatch result.
-
-**Safety principle:** an alert alone should not initiate containment. The response action should only execute on the explicit Yes/approve branch. Confirm the source IP and target agent before approving a block.
 
 ## Architecture
 
@@ -66,7 +64,6 @@ The lab uses VirtualBox with NAT for updates and a host-only adapter for private
 |---|---|---:|---:|---:|---|
 | `WAZUH-SERVER` | Ubuntu Server | 4 | 8 GB | 100 GB | `192.168.56.10/24` |
 | `THEHIVE-SERVER` | Ubuntu Server | 4 | 12 GB | 100 GB | `192.168.56.30/24`; web UI intended at `http://192.168.56.30:9000` |
-| `LINUX-ENDPOINT` | Ubuntu/Linux | — | — | — | Reference address `192.168.56.100`; confirm current agent ID and IP |
 | `KALI-LINUX` | Kali Linux | 2 | 4 GB | 80 GB | Build notes include `192.168.56.107`; verify current address with `ip -br addr` |
 
 Hardware values are allocations recorded in the build notes, not minimum requirements. Adjust allocations to available host resources.
@@ -79,9 +76,8 @@ Hardware values are allocations recorded in the build notes, not minimum require
 | SSH brute-force detection | **Implemented** | Custom rule `100003` is used for repeated matching failed SSH attempts in a time window. The frequency/timeframe logic should not be described as strictly consecutive attempts without a separate stateful correlator. |
 | Shuffle Cloud + self-hosted Orborus | **Complete** | The `shuffle-workers` service was observed at `1/1`; the HTTP, AI, Subflow, and Tools services were observed at `2/2`. |
 | Alert forwarding and email notification | **Complete** | The workflow reached the email step and asked the analyst whether to block the source IP. |
-| VirusTotal IP enrichment | **Implemented** | Screenshot included; reputation results provide context for the approval decision. |
-| Analyst approval gate | **Implemented** | Keep the Wazuh response action on the Yes/approve branch and verify the No branch after workflow edits. |
-| Wazuh API Active Response dispatch | **Dispatch evidence captured; endpoint validation recommended** | One captured API response reported HTTP `200`, one affected item, zero failed items, and `AR command was sent to all agents`. Verify endpoint Active Response logs and firewall state when retesting. |
+| VirusTotal IP enrichment | **Implemented** | Screenshot included; Output would be used in case generation with TheHive. |
+| Wazuh API Active Response dispatch | **Dispatch evidence captured**| One captured API response reported HTTP `200`, one affected item, zero failed items, and `AR command was sent to all agents`. Testing shows the IP of 192.168.56.1 cannot access 192.168.56.107 unless the ip table is flushed |
 | TheHive case creation | **Not integrated — hardware/resource limitation** | I was not able to integrate TheHive into the final workflow because of the available lab hardware/resources. It remains a future extension; no successful automated case creation is claimed. |
 
 ## Repository layout
